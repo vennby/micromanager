@@ -1,0 +1,31 @@
+{% extends 'layout.html' %} {% block content %}
+<div class="text-center py-5">
+  <h1 class="display-4 mb-3">
+    Welcome to <span class="fw-bold">MTC Manager</span>
+  </h1>
+  <p class="lead mb-4">
+    Your all-in-one platform for managing MTC activities, events, and
+    documentation.
+  </p>
+  <div class="d-flex justify-content-center flex-wrap mb-4 gap-3">
+    <a
+      href="{{ url_for('manage_event') }}"
+      class="btn btn-primary btn-lg mx-2 my-1"
+    >
+      Add New Event
+    </a>
+    <a
+      href="{{ url_for('index') }}"
+      class="btn btn-outline-secondary btn-lg mx-2 my-1"
+    >
+      View All Events
+    </a>
+    <a
+      href="{{ url_for('download_pdf') }}"
+      class="btn btn-success btn-lg mx-2 my-1"
+    >
+      Event Documentation Generator
+    </a>
+  </div>
+</div>
+{% endblock %}
