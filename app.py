@@ -176,5 +176,68 @@ def download_pdf():
     events = EventDocumentations.query.all()
     return render_template('download_pdf.html', events=events)
 
+
+@app.route('/download/<int:event_id>')
+def download_single(event_id):
+    event = EventDocumentations.query.get_or_404(event_id)
+
+    buffer = io.BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=A4)
+    width, height = A4
+
+    styles = getSampleStyleSheet()
+    justified_style = ParagraphStyle(
+        name='Justified',
+        parent=styles['Normal'],
+        fontName='Helvetica',
+        fontSize=12,
+        leading=14,
+        alignment=TA_JUSTIFY
+    )
+
+    # Event page
+    draw_page_border(pdf, width, height)
+    y = height - 50
+
+    pdf.setFont("Helvetica-Bold", 16)
+    pdf.drawString(50, y, event.title)
+    y -= 30
+
+    pdf.setFont("Helvetica", 12)
+    pdf.drawString(50, y, f"Date: {event.date}")
+    y -= 20
+    pdf.drawString(50, y, f"Participants: {event.participants}")
+    y -= 20
+
+    if event.image_filename:
+        image_path = os.path.join(app.config['UPLOAD_FOLDER'], event.image_filename)
+        try:
+            img = ImageReader(image_path)
+            img_width = width - 100
+            img_height = 180
+            pdf.drawImage(img, 50, y - img_height, width=img_width, height=img_height, preserveAspectRatio=True, mask='auto')
+            y -= img_height + 10
+        except Exception:
+            pass
+
+    desc_para = Paragraph(event.description.replace('\n', '<br />'), justified_style)
+    desc_height = 500
+    desc_frame = Frame(50, y - desc_height, width - 100, desc_height, showBoundary=0)
+    desc_frame.addFromList([desc_para], pdf)
+
+    pdf.save()
+    buffer.seek(0)
+
+    filename = secure_filename(f"{event.title}.pdf")
+    if not filename.lower().endswith('.pdf'):
+        filename += '.pdf'
+
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name=filename,
+        mimetype='application/pdf'
+    )
+
 if __name__ == '__main__':
     app.run(debug=True)
