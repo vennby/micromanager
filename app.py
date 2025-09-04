@@ -31,7 +31,7 @@ def home():
 
 @app.route('/events')
 def index():
-    events = EventDocumentations.query.all()
+    events = EventDocumentations.query.order_by(EventDocumentations.id.desc()).all()
     return render_template('index.html', events=events)
 
 @app.route('/event/add', methods=['GET', 'POST'])
@@ -72,8 +72,7 @@ def download_pdf():
         if not custom_filename.lower().endswith('.pdf'):
             custom_filename += '.pdf'
         download_filename = secure_filename(custom_filename)
-
-        events = EventDocumentations.query.filter(EventDocumentations.id.in_(selected_ids)).all()
+        events = EventDocumentations.query.filter(EventDocumentations.id.in_(selected_ids)).order_by(EventDocumentations.id.desc()).all()
 
         buffer = io.BytesIO()
         pdf = canvas.Canvas(buffer, pagesize=A4)
@@ -173,7 +172,7 @@ def download_pdf():
             mimetype='application/pdf'
         )
 
-    events = EventDocumentations.query.all()
+    events = EventDocumentations.query.order_by(EventDocumentations.id.desc()).all()
     return render_template('download_pdf.html', events=events)
 
 
